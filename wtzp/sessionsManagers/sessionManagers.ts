@@ -1,28 +1,82 @@
-export interface SessionData {
-  isSession: boolean;
-  folders: number;
-  step: number;
-  flow?: "gym" | "task"; 
-  data: Record<string, any>; 
+import formatPhone from "../modules/treatData/formatPhone";
+import api from "./api"; // o axios.create que você fez
+
+interface UserSession {
+  sessionId: string;
 }
 
-class SessionManager {
-  private sessions: Record<string, SessionData> = {};
+interface TypebotMessage {
+  id: string;
+  type: string;
+  content: any;
+}
 
-  getSession(chatId: string): SessionData {
-    if (!this.sessions[chatId]) {
-      this.sessions[chatId] = { isSession: false, folders: 0 , step: 0, data: {} };
+interface StartChatResponse {
+  sessionId: string;
+  messages: TypebotMessage[];
+}
+
+interface ContinueChatResponse {
+  messages: TypebotMessage[];
+}
+
+export class Users {
+  private users: Record<string, UserSession>;
+
+  constructor() {
+    this.users = {};
+  }
+
+  async addUser(id: string): Promise<TypebotMessage[] | false> {
+    try {
+      const response = await api.post<StartChatResponse>(
+        `/typebots/treino-digital-614i3z4/startChat`,
+           {
+          message: formatPhone(id),
+          type: "text",
+        }
+      );
+
+      const data = response.data;
+
+      this.users[id] = {
+        sessionId: data.sessionId,
+      };
+
+      return data.messages;
+    } catch (error) {
+      console.error("Erro ao add User:", error);
+      return false;
     }
-    return this.sessions[chatId];
   }
 
-  setSession(chatId: string, data: Partial<SessionData>) {
-    this.sessions[chatId] = { ...this.getSession(chatId), ...data };
+  async getStep(id: string, msg: string): Promise<TypebotMessage[] | undefined> {
+    try {
+      const session = this.users[id];
+      if (!session) throw new Error("Usuário não encontrado!");
+
+      const response = await api.post<ContinueChatResponse>(
+        `/sessions/${session.sessionId}/continueChat`,
+        {
+          message: msg,
+          type: "text",
+        }
+      );
+
+      const data = response.data;
+
+      return data.messages;
+    } catch (e) {
+      console.log("Erro ao pegar msg do flow", e);
+    }
   }
 
-  resetSession(chatId: string) {
-    this.sessions[chatId] = { isSession: false, folders: 0, step: 0, data: {} };
+  async delete(id:string){
+    delete this.users[id]
+  }
+
+  find(id: string): string | null {
+    const session = this.users[id];
+    return session ? session.sessionId : null;
   }
 }
-
-export const sessionManager = new SessionManager();

@@ -1,47 +1,37 @@
-// whatsapp.ts
-import { Client, LocalAuth } from "whatsapp-web.js";
-const qrcode = require('qrcode-terminal');
+import treatRecivedMessage from "./modules/treatMessages/treatRecivedMessage";
+
+const qrcode = require("qrcode-terminal");
+const { Client, LocalAuth } = require('whatsapp-web.js');
 
 const client = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: { headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] },
+  authStrategy: new LocalAuth(), // salva sessão localmente
+  puppeteer: {
+    headless: true, // true → navegador invisível, false → aparece (debug)
+    args: ["--no-sandbox", "--disable-setuid-sandbox"], // flags para Linux
+  },
 });
 
-client.on('qr', (qr: string) => {
-    qrcode.generate(qr, { small: true });
+client.on("qr", (qr: any) => {
+  qrcode.generate(qr, { small: true });
 });
 
-let clientReady = false;
-client.on('ready', () => {
-    console.log('Client is ready!');
-    clientReady = true;
+client.on("ready", () => {
+  console.log("Client is ready!");
 });
-
-const waitClientReady = () => {
-    return new Promise<void>((resolve) => {
-        if (clientReady) resolve();
-        else client.once('ready', () => resolve());
-    });
+const sendMessage = async (number: string, messages: string[]) => {
+  for (let i = 0; i < messages.length; i++) {
+    await client.sendMessage(number, messages[i]);
+    console.log(`[INFO] Mensagem enviada para ${number}: ${messages[i]}`);
+  }
 };
+client.on("message", async (msg: any) => {
+  console.log(`[RECEBIDO] De ${msg.from}: ${msg.body}`);
 
-// função reutilizável para enviar mensagens
-const sendMessage = async (phone: string, message: string) => {
-    await waitClientReady();
-    const formattedPhone = "55" + phone.replace(/\D/g, '') + "@c.us";
+  const response = await treatRecivedMessage(msg);
 
-    try {
-        await client.sendMessage(formattedPhone, message);
-        console.log(`Mensagem enviada para ${formattedPhone}`);
-    } catch (err) {
-        console.error("Erro ao enviar mensagem:", err);
-    }
-};
-
-// middleware de exemplo
-const onMessage = (callback: (msg: any) => void) => {
-    
-};
+  if (response && Array.isArray(response) && response.length > 0) {
+    await sendMessage(msg.from, response);
+  }
+});
 
 client.initialize();
-
-export { client, sendMessage, onMessage };

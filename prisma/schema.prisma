@@ -53,8 +53,8 @@ enum WorkoutType {
   PERSONAL
 }
 
-enum Role {
-  SUPERADMIN
-  ADMIN
-  USER
-}
+  enum Role {
+    SUPERADMIN
+    ADMIN
+    USER
+  }

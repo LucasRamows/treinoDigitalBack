@@ -25,8 +25,9 @@ const getDayExercise = async (id?: string, phone?: string) => {
             return({error})
         }
     }else{
+        console.log("no else do id")
         const user = await getUser(phone)
-        const userId = user 
+        console.log(user?.id)
         try {
             const exercises = await prisma.userExercise.findMany({
                 where: {
