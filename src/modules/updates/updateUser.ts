@@ -18,7 +18,7 @@ const updateUser = async (
             email,
             workoutType,
             key,
-            ...(weigth && { weigth: { push: weigth } }) // ⬅ só faz push se existir
+            ...(weigth && { weigth: { push: weigth } }) 
         }
     });
 

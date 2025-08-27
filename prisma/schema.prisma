@@ -10,6 +10,7 @@ datasource db {
 model User {
   id           String         @unique @default(cuid())
   role         Role           @default(USER)
+  frequency    Int            @default(1)
   workoutType  WorkoutType    @default(PROGRESSIVE)
   name         String
   email        String         @unique
@@ -23,25 +24,27 @@ model User {
 }
 
 model Exercise {
-  id Int @id @default(autoincrement())
-  name String
-  image String?
-  description String
-  createAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int            @id @default(autoincrement())
+  name          String
+  image         String?
+  description   String
+  createAt      DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   userExercises UserExercise[]
 }
 
 model UserExercise {
-  id     String @unique @default(cuid())
-  weight Float[]
-  day    String[]
-  status Boolean  @default(true)
-
+  id         String   @unique @default(cuid())
+  weight     Float[]
+  day        String[]
+  sessions   Int      @default(3)
+  reps       Int      @default(12)
+  status     Boolean  @default(true)
+  frequency  Int      @default(1)
   userId     String
   exerciseId Int
 
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade) 
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercise Exercise @relation(fields: [exerciseId], references: [id])
 
   @@unique([userId, exerciseId])
@@ -53,8 +56,8 @@ enum WorkoutType {
   PERSONAL
 }
 
-  enum Role {
-    SUPERADMIN
-    ADMIN
-    USER
-  }
+enum Role {
+  SUPERADMIN
+  ADMIN
+  USER
+}

@@ -7,6 +7,9 @@ import getGlobalExercises from "./admin/getGlobalExercisesRoute"
 import updateGlobalExercise from "./superAdmin/updateGlobalExerciseRoute"
 import getDayExercise from "./private/getDayExercicesRoute"
 import updateUser from "./private/updateUserRoute"
+import updateUserExercise from "./private/updateUserExerciseRoute"
+import updateManyExercises from "./superAdmin/updateManyUserExercisesRoute"
+
 
 const router = Router();
 
@@ -18,5 +21,7 @@ router.use(getGlobalExercises);
 router.use(updateGlobalExercise);
 router.use(getDayExercise);
 router.use(updateUser);
+router.use(updateUserExercise);
+router.use(updateManyExercises);
 
 export default router;
