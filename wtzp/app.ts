@@ -25,8 +25,6 @@ const sendMessage = async (number: string, messages: string[]) => {
   }
 };
 client.on("message", async (msg: any) => {
-  console.log(`[RECEBIDO] De ${msg.from}: ${msg.body}`);
-
   const response = await treatRecivedMessage(msg);
 
   if (response && Array.isArray(response) && response.length > 0) {

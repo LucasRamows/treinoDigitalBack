@@ -8,7 +8,7 @@ const router = express.Router();
 router.use(express.json());
 
 
-router.get("/get-day-exercises", async (req, res) => {
+router.post("/get-day-exercises", async (req, res) => {
   const { id, phone } = req.body
   const exercise = await getDayExercices(id?id:undefined, phone?phone:undefined);
   res.json(exercise);
