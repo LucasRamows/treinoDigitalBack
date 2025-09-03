@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @unique @default(cuid())
+  role      Role      @default(USER)
+  name      String
+  email     String    @unique
+  birthDay  String
+  phone     String    @unique
+  key       String
+  createAt  DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  userGym   UserGym[]
+  tasks     Tasks[]
+}
+
+model Tasks {
+  id          String      @unique @default(cuid())
+  status      Boolean     @default(false)
+  name        String
+  description String
+  date        DateTime
+  isPriority  Boolean
+  createAt    DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  userId      String
+  reminders   Reminders[]
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Reminders {
+  id        String   @unique @default(cuid())
+  date      DateTime
+  createAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tasksId   String
+  tasks     Tasks    @relation(fields: [tasksId], references: [id], onDelete: Cascade)
+}
+
+model UserGym {
+  id            String         @unique @default(cuid())
+  frequency     Int            @default(1)
+  frequencyYear Int[]
+  workoutType   WorkoutType    @default(PROGRESSIVE)
+  weigth        Float[]
+  height        Float[]
+  userExercise  UserExercise[]
+  userId        String         @unique
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Exercise {
+  id            Int            @id @default(autoincrement())
+  name          String
+  image         String?
+  description   String
+  createAt      DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  userExercises UserExercise[]
+}
+
+model UserExercise {
+  id         String   @unique @default(cuid())
+  weight     Float[]
+  day        String[]
+  sessions   Int      @default(3)
+  reps       Int      @default(12)
+  status     Boolean  @default(true)
+  frequency  Int      @default(1)
+  userId     String
+  exerciseId Int
+
+  user     UserGym  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@unique([userId, exerciseId])
+}
+
+enum WorkoutType {
+  PROGRESSIVE
+  SPECIAL
+  PERSONAL
+}
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  USER
+}
