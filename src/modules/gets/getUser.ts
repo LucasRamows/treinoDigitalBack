@@ -1,8 +1,11 @@
 import { prisma } from "../../../prisma/prisma";
 
-const getUser = async (id: string, includeExercises = false) => {
-  const user = await prisma.user.findUnique({
-    where: { id },
+const getUser = async (id?: string, phone?: string, includeExercises = false) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      ...(id && { id }),
+      ...(phone && { phone }),
+    },
     include: {
       userGym: includeExercises
         ? {

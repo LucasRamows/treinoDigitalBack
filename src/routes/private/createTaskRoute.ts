@@ -1,12 +1,12 @@
 import express from "express";
 import createTask from "../../modules/creates/createTask";
 import createReminder from "../../modules/creates/createReminder";
+import getUser from "../../modules/gets/getUser";
 
 const router = express.Router();
 
 router.use(express.json());
 
-// Função para converter dd/mm/aaaa em Date
 const parseDateDMY = (dateStr: string): Date => {
   const [day, month, year] = dateStr.split("/").map(Number);
   return new Date(year, month - 1, day); // mês no Date é 0-index
@@ -14,10 +14,11 @@ const parseDateDMY = (dateStr: string): Date => {
 
 router.post("/create-task", async (req, res) => {
   try {
-    const { name, description, date, isPriority, userId, reminderDays } =
+    const { name, description, date, isPriority, phone, reminderDays } =
       req.body;
 
-    // Cria a taskDate a partir do formato dd/mm/aaaa ou usa a data atual
+    const userId = await getUser(undefined, phone);
+    console.log(userId)
     const taskDate = date
       ? parseDateDMY(date)
       : new Date(
@@ -30,7 +31,7 @@ router.post("/create-task", async (req, res) => {
     const newTask = await createTask(
       name,
       description,
-      userId,
+      userId?userId.id:"",
       taskDate,
       isPriority ?? false
     );
