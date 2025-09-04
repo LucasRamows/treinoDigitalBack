@@ -78,12 +78,28 @@ app.listen(3050, () => {
 });
 
 client.initialize();
-
 const TWO_HOURS = 1000 * 60 * 60 * 2;
+
+const isWithinWorkingHours = () => {
+  const now = new Date();
+  const hour = now.getHours();
+  return hour >= 6 && hour < 20; // 6h até 19:59
+};
+
 (async () => {
   await waitClientReady();
-  whatsAppGetReminder(); // roda na inicialização
-  setInterval(whatsAppGetReminder, TWO_HOURS); // depois a cada 2h
+
+  // Rodar na inicialização se dentro do horário
+  if (isWithinWorkingHours()) {
+    whatsAppGetReminder();
+  }
+
+  // Rodar a cada 2 horas, mas só se estiver dentro do horário
+  setInterval(() => {
+    if (isWithinWorkingHours()) {
+      whatsAppGetReminder();
+    }
+  }, TWO_HOURS);
 })();
 
 export { client, sendMessage };

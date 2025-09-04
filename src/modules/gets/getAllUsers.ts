@@ -5,7 +5,7 @@ const getAllUsers = async () => {
     include: {
       userGym: {
         include: {
-          userExercise: true, // inclui exercícios associados
+          userExercise: true,
         },
       },
       tasks: {include:{reminders:true}}, 

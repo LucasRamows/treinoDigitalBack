@@ -16,7 +16,6 @@ router.post("/create-task", async (req, res) => {
   try {
     const { name, description, date, isPriority, phone, reminderDays } =
       req.body;
-
     const userId = await getUser(undefined, phone);
     console.log(userId)
     const taskDate = date

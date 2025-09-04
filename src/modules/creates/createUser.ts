@@ -24,13 +24,15 @@ const createUser = async (
       role: role === "ADMIN" ? Role.ADMIN : Role.USER,
       userGym: workoutType
         ? {
-            create: {
-              workoutType,
-              frequency: frequency ?? 1,
-              frequencyYear: frequencyYear ?? [],
-              weigth: weight ?? [],
-              height: height ?? [],
-            },
+            create: [
+              {
+                workoutType,
+                frequency: frequency ?? 1,
+                frequencyYear: frequencyYear ?? [],
+                weigth: weight ?? [],
+                height: height ?? [],
+              },
+            ],
           }
         : undefined,
     },

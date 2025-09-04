@@ -1,11 +1,11 @@
 import updateTask from "../../../src/modules/updates/updateTask";
-import { Users } from "../../sessionsManagers/sessionManagers";
+import { SessionManager } from "../../sessionsManagers/sessionManagers";
 import formatPhone from "../treatData/formatPhone";
 import extractMessages from "./extractMessages";
 
-const users = new Users();
+const sessionManager = new SessionManager();
 
-// Função para processar a mensagem com extractMessages
+// Função para processar mensagens
 const processMessage = async (message: any) => {
   if (!message) return;
   return await extractMessages(message);
@@ -20,10 +20,13 @@ const handleQuotedMessage = async (msg: any) => {
     console.log("Condição: mensagem citada");
     console.log("Mensagem citada:", quoted.body);
 
+    const parts = quoted.body.split(":");
+    const msgName = parts[1]?.trim();
     const msgParts = quoted.body.split(" ");
-    const msgName = quoted.body.split(":")[1]?.trim();
     const date = msgParts[2];
     const phone = formatPhone(msg.from);
+
+    if (!msgName || !date) return;
 
     const updated = await updateTask({
       msg_quot_name: msgName,
@@ -37,48 +40,51 @@ const handleQuotedMessage = async (msg: any) => {
     console.error("Erro ao acessar mensagem citada:", err);
   }
 };
-const endSession = async (id: any) => {
-  const phone = await formatPhone(formatPhone(id))
-  console.log("phone",phone.trim(),"daskd")
-  users.delete(phone.trim());
-  return
-};
-const treatRecivedMessage = async (msg: any) => {
-  const session = users.find(msg.from);
 
-  // Condição: novo usuário sem mensagem citada
-  if (session === null && msg.body === "#treino") {
+// Encerrar sessão
+const endSession = async (id: string) => {
+  const phone = formatPhone(id).trim();
+  sessionManager.delete(phone);
+  console.log("Sessão finalizada para:", phone);
+};
+
+// Função principal para tratar mensagens recebidas
+const treatRecivedMessage = async (msg: any) => {
+  const phone = formatPhone(msg.from).trim();
+  const sessionId = sessionManager.find(phone);
+
+  // Novo usuário sem mensagem citada
+  if (!sessionId && msg.body === "#treino") {
     console.log("Condição: novo usuário sem mensagem citada");
-    const message = await users.addUser(msg.from);
+    const message = await sessionManager.startSession(phone, "treino-digital-614i3z4");
     return await processMessage(message);
   }
 
-  // Condição: reiniciar sessão
-  if (session !== null && msg.body === "#restart") {
+  // Reiniciar sessão
+  if (sessionId && msg.body === "#restart") {
     console.log("Condição: reiniciar sessão");
-    users.delete(msg.from);
-    console.log("from", msg.from);
+    sessionManager.delete(phone);
     return;
   }
 
-  // Condição: adicionar nova tarefa
-  if (session === null && msg.body === "#n") {
+  // Adicionar nova tarefa
+  if (!sessionId && msg.body === "#n") {
     console.log("Condição: adicionar nova tarefa");
-    const message = await users.addTask(msg.from);
+    const message = await sessionManager.startSession(phone, "create-reminder-jv67tbx");
     return await processMessage(message);
   }
 
-  // Condição: usuário sem sessão mas com mensagem citada
-  if (session === null && msg.hasQuotedMsg) {
+  // Usuário sem sessão mas com mensagem citada
+  if (!sessionId && msg.hasQuotedMsg) {
     return await handleQuotedMessage(msg);
   }
 
-  // Condição: usuário em sessão normal
+  // Usuário em sessão normal
   console.log("Condição: usuário em sessão normal");
-  const message = await users.getStep(msg.from, msg.body);
-  if (message !== undefined) {
+  const message = await sessionManager.continueSession(phone, msg.body);
+  if (message) {
     return await processMessage(message);
   }
 };
 
-export { treatRecivedMessage,endSession };
+export { treatRecivedMessage, endSession };
