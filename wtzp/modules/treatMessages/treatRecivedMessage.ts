@@ -43,14 +43,14 @@ const handleQuotedMessage = async (msg: any) => {
 
 // Encerrar sessão
 const endSession = async (id: string) => {
-  const phone = formatPhone(id).trim();
+  const phone = id;
   sessionManager.delete(phone);
   console.log("Sessão finalizada para:", phone);
 };
 
 // Função principal para tratar mensagens recebidas
 const treatRecivedMessage = async (msg: any) => {
-  const phone = formatPhone(msg.from).trim();
+  const phone = formatPhone(msg.from);
   const sessionId = sessionManager.find(phone);
 
   // Novo usuário sem mensagem citada

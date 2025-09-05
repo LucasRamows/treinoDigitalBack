@@ -9,22 +9,28 @@ const getAndDeleteTodayReminders = async () => {
   const endOfDay = new Date(today);
   endOfDay.setHours(23, 59, 59, 999);
 
-  // Transação: busca e deleta os reminders do dia
-  const reminders = await prisma.$transaction(async (tx) => {
-    const toDelete = await tx.reminders.findMany({
-      where: {
-        date: { gte: startOfDay, lte: endOfDay },
+  // Buscar os reminders de hoje
+  const reminders = await prisma.reminders.findMany({
+    where: {
+      date: {
+        gte: startOfDay,
+        lte: endOfDay,
       },
-      include: { tasks: { include: { user: true } } },
-    });
-
-    await tx.reminders.deleteMany({
-      where: { id: { in: toDelete.map((r) => r.id) } },
-    });
-
-    return toDelete;
+    },
+    include: {
+      tasks: { include: { user: true } },
+    },
   });
 
+  if (reminders.length > 0) {
+    // Deletar todos os reminders encontrados
+    await prisma.reminders.deleteMany({
+      where: {
+        id: { in: reminders.map((r) => r.id) },
+      },
+    });
+  }
+  console.log(reminders)
   return reminders;
 };
 

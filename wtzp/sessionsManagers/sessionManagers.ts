@@ -14,10 +14,10 @@ interface TypebotMessage {
 export class SessionManager {
   private sessions: Record<string, Session> = {};
 
-  async startSession(id: string, typebotEndpoint: string): Promise<TypebotMessage[] | false> {
+  async startSession(id: any, typebotEndpoint: string): Promise<TypebotMessage[] | false> {
     try {
       const response = await api.post(`/typebots/${typebotEndpoint}/startChat`, {
-        message: formatPhone(id),
+        message: id,
         type: "text",
       });
 

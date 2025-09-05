@@ -1,25 +1,31 @@
 import { sendMessage } from "../../../app";
-import { Users } from "../../sessionsManagers/sessionManagers";
-import formatFirstMessage from "../treatData/formatFirstMessage";
+import { SessionManager } from "../../sessionsManagers/sessionManagers";
 import formatPhone from "../treatData/formatPhone";
 import extractMessages from "../treatMessages/extractMessages";
-import getTodayReminders from "./getTodayReminders";
-const users = new Users();
+import getAndDeleteTodayReminders from "./getTodayReminders";
+
+const sessionManager = new SessionManager();
+
 const whatsAppGetReminder = async () => {
-  const reminders = await getTodayReminders();
+  const reminders = await getAndDeleteTodayReminders();
 
   for (let reminder of reminders) {
     console.log("no reminder", reminder);
-
-    const mess = await users.sendReminder(reminder);
+    const message = {
+      name: reminder.tasks.name,
+      date: reminder.tasks.date,
+    };
+    // envia a reminder via SessionManager
+    const mess = await sessionManager.startSession(
+      JSON.stringify(message),
+      "reminder-v20x6b6"
+    );
 
     if (mess) {
-      console.log("no mes", extractMessages(mess));
+      const formatted = extractMessages(mess);
+      console.log("no mes", formatted);
 
-       await sendMessage(
-          formatPhone(reminder.tasks.user.phone),
-          extractMessages(mess)
-        );
+      await sendMessage(formatPhone(reminder.tasks.user.phone), formatted);
     }
   }
 };
