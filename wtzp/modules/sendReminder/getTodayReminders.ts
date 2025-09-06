@@ -23,14 +23,12 @@ const getAndDeleteTodayReminders = async () => {
   });
 
   if (reminders.length > 0) {
-    // Deletar todos os reminders encontrados
-    await prisma.reminders.deleteMany({
-      where: {
-        id: { in: reminders.map((r) => r.id) },
-      },
+    reminders.forEach(async (reminder) => {
+      await prisma.reminders.delete({
+        where: { id: reminder.id },
+      });
     });
   }
-  console.log(reminders)
   return reminders;
 };
 

@@ -1,5 +1,4 @@
-import { prisma, Role } from "../../../prisma/prisma"; // importa Role do Prisma
-
+import { prisma } from "../../../prisma/prisma";
 const getGlobalExercises = async () => {
     const exercises = await prisma.exercise.findMany({
     });

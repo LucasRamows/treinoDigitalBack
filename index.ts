@@ -24,11 +24,6 @@ app.use("/", getTodayRemindersRoute);
 
 
 //output
-app.listen(3050, () => {
+app.listen(3000, () => {
   console.log("Servidor rodando em http://localhost:3050");
 });
-
-
-setInterval(() => {
-  whatsAppGetReminder();
-}, 1000 * 60 * 60 * 2);

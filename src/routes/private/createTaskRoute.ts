@@ -1,6 +1,6 @@
 import express from "express";
-import createTask from "../../modules/creates/createTask";
-import createReminder from "../../modules/creates/createReminder";
+import createTask from "../../modules/post/createTask";
+import createReminder from "../../modules/post/createReminder";
 import getUser from "../../modules/gets/getUser";
 
 const router = express.Router();
@@ -16,7 +16,7 @@ router.post("/create-task", async (req, res) => {
   try {
     const { name, description, date, isPriority, phone, reminderDays } =
       req.body;
-    const userId = await getUser(undefined, phone);
+    const userId = await getUser(undefined, phone, false, undefined);
     console.log(userId)
     const taskDate = date
       ? parseDateDMY(date)

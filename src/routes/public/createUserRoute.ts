@@ -1,5 +1,5 @@
 import express from "express";
-import createUser from "../../modules/creates/createUser";
+import createUser from "../../modules/post/createUser";
 import { WorkoutType } from "@prisma/client";
 
 const router = express.Router();

@@ -1,5 +1,5 @@
 import express from "express";
-import createExercise from "../../modules/creates/createExercise";
+import createExercise from "../../modules/post/createExercise";
 
 //consts
 const router = express.Router();
