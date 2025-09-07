@@ -1,15 +1,15 @@
-import express from "express";
-import getAllUsers from "../../modules/gets/getAllUsers";
+  import express from "express";
+  import getAllUsers from "../../modules/gets/getAllUsers";
 
-//consts
-const router = express.Router();
+  //consts
+  const router = express.Router();
 
-//basics
-router.use(express.json());
+  //basics
+  router.use(express.json());
 
 
-router.get("/get-all-users", async (req, res) => {
-  const users = await getAllUsers();
-  res.json(users);
-});
-export default router
+  router.get("/get-all-users", async (req, res) => {
+    const users = await getAllUsers();
+    res.json(users);
+  });
+  export default router

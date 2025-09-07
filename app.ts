@@ -1,6 +1,5 @@
 // whatsapp.ts
 import { Client, LocalAuth } from "whatsapp-web.js";
-import { treatRecivedMessage } from "./wtzp/modules/treatMessages/treatRecivedMessage";
 
 import express from "express";
 import cors from "cors";
@@ -8,8 +7,12 @@ import publicRoutes from "./src/routes/public";
 import privateRoutes from "./src/routes/private";
 import adminRoutes from "./src/routes/admin";
 import superAdminRoutes from "./src/routes/superAdmin";
-import getTodayRemindersRoute from "./wtzp/modules/sendReminder/getTodayRemindersRoutes";
-import whatsAppGetReminder from "./wtzp/modules/sendReminder/whatsAppGetReminder";
+import getTodayRemindersRoute from "./src/routes/private/getTodayRemindersRoutes";
+import { treatRecivedMessage } from "./wtzp/modules/treatRecivedMessage";
+import whatsAppGetReminder from "./wtzp/modules/whatsAppGetReminder";
+import auth from "./src/middlewares/auth";
+import authAdmin from "./src/middlewares/authAdmin";
+import authSuperAdmin from "./src/middlewares/authSuperAdmin";
 
 const qrcode = require("qrcode-terminal");
 
@@ -68,9 +71,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use("/", publicRoutes);
-app.use("/", privateRoutes);
-app.use("/", adminRoutes);
-app.use("/", superAdminRoutes);
+app.use("/", auth, privateRoutes);
+app.use("/", authAdmin, adminRoutes);
+app.use("/", authSuperAdmin, superAdminRoutes);
 app.use("/", getTodayRemindersRoute);
 
 app.listen(3050, () => {
@@ -78,23 +81,22 @@ app.listen(3050, () => {
 });
 
 client.initialize();
-const TWO_HOURS = 1000 * 60 * 60 * 2;
+const TWO_HOURS = 1000 * 60 * 60;
 
 const isWithinWorkingHours = () => {
-  const now = new Date();
-  const hour = now.getHours();
-  return hour >= 6 && hour < 20; // 6h até 19:59
+  const now = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+  const date = new Date(now);
+  const hour = date.getHours();
+  return hour >= 7 && hour < 20;
 };
 
 (async () => {
   await waitClientReady();
 
-  // Rodar na inicialização se dentro do horário
   if (isWithinWorkingHours()) {
     whatsAppGetReminder();
   }
 
-  // Rodar a cada 2 horas, mas só se estiver dentro do horário
   setInterval(() => {
     if (isWithinWorkingHours()) {
       whatsAppGetReminder();

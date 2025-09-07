@@ -21,7 +21,7 @@ const createUser = async (
       birthDay,
       phone,
       key,
-      role: role === "ADMIN" ? Role.ADMIN : Role.USER,
+      role: role === "ADMIN" ? Role.SUPERADMIN : Role.USER,
       userGym: workoutType
         ? {
             create: [

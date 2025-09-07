@@ -1,7 +1,7 @@
-import updateTask from "../../../src/modules/updates/updateTask";
-import { SessionManager } from "../../sessionsManagers/sessionManagers";
-import formatPhone from "../treatData/formatPhone";
+import updateTask from "../../src/modules/updates/updateTask";
+import { SessionManager } from "../sessionManagers";
 import extractMessages from "./extractMessages";
+import formatPhone from "./formats/formatPhone";
 
 const sessionManager = new SessionManager();
 
@@ -47,8 +47,6 @@ const endSession = async (id: string) => {
   sessionManager.delete(phone);
   console.log("Sessão finalizada para:", phone);
 };
-
-// Função principal para tratar mensagens recebidas
 const treatRecivedMessage = async (msg: any) => {
   const phone = formatPhone(msg.from);
   const sessionId = sessionManager.find(phone);
@@ -56,7 +54,10 @@ const treatRecivedMessage = async (msg: any) => {
   // Novo usuário sem mensagem citada
   if (!sessionId && msg.body === "#treino") {
     console.log("Condição: novo usuário sem mensagem citada");
-    const message = await sessionManager.startSession(phone, "treino-digital-614i3z4");
+    const message = await sessionManager.startSession(
+      phone,
+      "treino-digital-614i3z4"
+    );
     return await processMessage(message);
   }
 
@@ -70,7 +71,10 @@ const treatRecivedMessage = async (msg: any) => {
   // Adicionar nova tarefa
   if (!sessionId && msg.body === "#n") {
     console.log("Condição: adicionar nova tarefa");
-    const message = await sessionManager.startSession(phone, "create-reminder-jv67tbx");
+    const message = await sessionManager.startSession(
+      phone,
+      "create-reminder-jv67tbx"
+    );
     return await processMessage(message);
   }
 
@@ -80,11 +84,17 @@ const treatRecivedMessage = async (msg: any) => {
   }
 
   // Usuário em sessão normal
-  console.log("Condição: usuário em sessão normal");
-  const message = await sessionManager.continueSession(phone, msg.body);
-  if (message) {
-    return await processMessage(message);
+  if (sessionId) {
+    console.log("Condição: usuário em sessão normal");
+    const message = await sessionManager.continueSession(phone, msg.body);
+    if (message) {
+      return await processMessage(message);
+    }
   }
+
+  // Caso não esteja em nenhuma sessão nem use palavra-chave
+  console.log("Condição: usuário sem sessão e sem palavra-chave");
+  return "Selecione a opção e mande a palavra-chave:\n\n#n - Para criar uma nova tarefa";
 };
 
 export { treatRecivedMessage, endSession };

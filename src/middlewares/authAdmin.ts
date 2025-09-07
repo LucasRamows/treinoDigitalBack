@@ -12,7 +12,8 @@ declare global {
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY || "null";
 
-const auth = (req: Request, res: Response, next: NextFunction) => {
+const authAdmin = (req: Request, res: Response, next: NextFunction) => {
+    console.log("Entrou no middleware authAdmin");
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
@@ -21,11 +22,13 @@ const auth = (req: Request, res: Response, next: NextFunction) => {
 
     try {
         const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload; 
-        req.user = decoded;
+        if (decoded.role !== 'admin' && decoded.role !== 'superadmin') {
+            return res.status(403).json({ message: "Acesso negado" });
+        }
         next();
     } catch (error) {
         return res.status(401).json({ message: "Token inválido" });
     }
 };
 
-export default auth;
+export default authAdmin;

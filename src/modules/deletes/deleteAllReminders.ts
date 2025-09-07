@@ -1,4 +1,4 @@
-import { prisma, Role } from "../../../prisma/prisma"; // importa Role do Prisma
+import { prisma } from "../../../prisma/prisma"; // importa Role do Prisma
 
 const deleteAllReminders = async (
 ) => {

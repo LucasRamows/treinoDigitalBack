@@ -1,8 +1,9 @@
-import { sendMessage } from "../../../app";
-import { SessionManager } from "../../sessionsManagers/sessionManagers";
-import formatPhone from "../treatData/formatPhone";
-import extractMessages from "../treatMessages/extractMessages";
-import getAndDeleteTodayReminders from "./getTodayReminders";
+import { sendMessage } from "../../app";
+import getAndDeleteTodayReminders from "../../src/modules/gets/getTodayReminders";
+import { SessionManager } from "../sessionManagers";
+import extractMessages from "./extractMessages";
+import formatPhone from "./formats/formatPhone";
+
 
 const sessionManager = new SessionManager();
 

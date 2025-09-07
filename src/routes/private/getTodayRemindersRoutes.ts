@@ -1,5 +1,5 @@
 import express from "express";
-import getTodayReminders from "./getTodayReminders";
+import getTodayReminders from "../../modules/gets/getTodayReminders";
 
 //consts
 const router = express.Router();

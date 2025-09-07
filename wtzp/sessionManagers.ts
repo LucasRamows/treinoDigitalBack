@@ -1,5 +1,5 @@
-import formatPhone from "../modules/treatData/formatPhone";
-import api from "./api"; // o axios.create que você fez
+import api from "./api";
+
 
 interface Session {
   sessionId: string;

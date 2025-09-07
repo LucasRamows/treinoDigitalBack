@@ -1,5 +1,5 @@
 import express from "express";
-import { endSession } from "../../../wtzp/modules/treatMessages/treatRecivedMessage";
+import { endSession } from "../../../wtzp/modules/treatRecivedMessage";
 
 const router = express.Router();
 router.use(express.json());
@@ -14,7 +14,7 @@ router.post("/end-session", async (req, res) => {
 
   try {
     console.log("Finalizando sessão do ID:", id);
-    await endSession(id); 
+    await endSession(id);
     console.log("Sessão finalizada com sucesso");
     res.status(200).json({ message: "Sessão finalizada com sucesso" });
   } catch (error) {
