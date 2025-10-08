@@ -1,31 +1,58 @@
-const extractMessages = (msgs: any[]): string => {
-  const mensagens: string[] = [];
+const extractMessages = async (response: any) => {
+  try {
+    if (!response || !Array.isArray(response)) return [];
 
-  const extractChildren = (node: any) => {
-    if (!node) return;
+    const messagesToSend: string[] = [];
 
-    if (typeof node.text === "string") {
+    const extractText = (node: any): string => {
+      if (!node) return "";
 
-      if (node.text === "") {
-        mensagens.push("\n");
-      } else {
-        mensagens.push(node.text);
+      if (node.text) return node.text;
+
+      if (node.type === "inline-variable") {
+        return node?.children?.[0]?.children?.[0]?.text || "";
       }
+
+      if (Array.isArray(node.children)) {
+        return node.children.map(extractText).join("");
+      }
+
+      return "";
+    };
+
+    for (const item of response) {
+      let message = "";
+
+      // if (item.type !== "text") {
+      //   const input = await INPUTSCONTROLLER.treatmentMessage(item);
+      //   messagesToSend.push(input);
+      //   continue;
+      // }
+
+      for (const richText of item.content.richText) {
+        if (richText.children.length > 1) {
+          // Muitos children → percorre todos
+          for (const child of richText.children) {
+            message += extractText(child);
+          }
+          message += "";
+        } else {
+          if (extractText(richText.children[0]) === "") {
+            message += "\n\n";
+          } else {
+            message += extractText(richText.children[0]);
+          }
+        }
+      }
+
+      messagesToSend.push(message);
     }
 
-    if (node.content?.richText && Array.isArray(node.content.richText)) {
-      node.content.richText.forEach(extractChildren);
-    }
-
-    if (node.children && Array.isArray(node.children)) {
-      node.children.forEach(extractChildren);
-    }
-  };
-
-  if (Array.isArray(msgs)) {
-    msgs.forEach((msg) => extractChildren(msg));
+    return messagesToSend;
+  } catch (e) {
+    console.error("Erro ao pegar mensagem do fluxo", e);
+    return [];
   }
-  return mensagens.join(" ");
 };
 
 export default extractMessages;

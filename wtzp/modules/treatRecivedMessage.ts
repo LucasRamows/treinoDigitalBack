@@ -17,8 +17,6 @@ const handleQuotedMessage = async (msg: any) => {
     const quoted = await msg.getQuotedMessage?.();
     if (!quoted?.body) return;
 
-    console.log("Condição: mensagem citada");
-    console.log("Mensagem citada:", quoted.body);
 
     const parts = quoted.body.split(":");
     const msgName = parts[1]?.trim();
@@ -35,7 +33,6 @@ const handleQuotedMessage = async (msg: any) => {
       newFields: { status: true },
     });
 
-    console.log("Task atualizada:", updated);
   } catch (err) {
     console.error("Erro ao acessar mensagem citada:", err);
   }
@@ -94,7 +91,7 @@ const treatRecivedMessage = async (msg: any) => {
 
   // Caso não esteja em nenhuma sessão nem use palavra-chave
   console.log("Condição: usuário sem sessão e sem palavra-chave");
-  return "Selecione a opção e mande a palavra-chave:\n\n#n - Para criar uma nova tarefa";
+return ["Selecione a opção e mande a palavra-chave:\n\n#n - Para criar uma nova tarefa"];
 };
 
 export { treatRecivedMessage, endSession };

@@ -13,7 +13,6 @@ declare global {
 const SECRET_KEY = process.env.JWT_SECRET_KEY || "null";
 
 const authAdmin = (req: Request, res: Response, next: NextFunction) => {
-    console.log("Entrou no middleware authAdmin");
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {

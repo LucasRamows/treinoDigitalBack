@@ -1,8 +1,7 @@
 import { prisma } from "../../../prisma/prisma";
 
-const getAndDeleteTodayReminders = async () => {
+const getTodayReminders = async () => {
   const today = new Date();
-
   const startOfDay = new Date(today);
   startOfDay.setHours(0, 0, 0, 0);
 
@@ -21,15 +20,7 @@ const getAndDeleteTodayReminders = async () => {
       tasks: { include: { user: true } },
     },
   });
-
-  if (reminders.length > 0) {
-    reminders.forEach(async (reminder) => {
-      await prisma.reminders.delete({
-        where: { id: reminder.id },
-      });
-    });
-  }
   return reminders;
 };
 
-export default getAndDeleteTodayReminders;
+export default getTodayReminders;

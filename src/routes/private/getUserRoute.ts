@@ -1,6 +1,6 @@
 import express from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import getUser from "../../modules/gets/getUser";
+import getUser from "../../modules/gets/getUserByPhone";
 
 const router = express.Router();
 
@@ -26,7 +26,7 @@ router.post("/get-user", async (req, res) => {
 
     const hasExercise = req.body;
 
-    const exercise = await getUser(id, phone, hasExercise, undefined);
+    const exercise = await getUser(phone);
 
     res.json(exercise);
   } catch (err) {

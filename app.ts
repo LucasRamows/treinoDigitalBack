@@ -9,10 +9,11 @@ import adminRoutes from "./src/routes/admin";
 import superAdminRoutes from "./src/routes/superAdmin";
 import getTodayRemindersRoute from "./src/routes/private/getTodayRemindersRoutes";
 import { treatRecivedMessage } from "./wtzp/modules/treatRecivedMessage";
-import whatsAppGetReminder from "./wtzp/modules/whatsAppGetReminder";
+import whatsAppGetReminder from "./src/modules/managers/GetListReminder";
 import auth from "./src/middlewares/auth";
 import authAdmin from "./src/middlewares/authAdmin";
 import authSuperAdmin from "./src/middlewares/authSuperAdmin";
+import reminders from "./src/modules/managers/reminders";
 
 const qrcode = require("qrcode-terminal");
 
@@ -62,46 +63,35 @@ const sendMessage = async (phone: string, message: string) => {
 client.on("message", async (msg) => {
   const messageBack = await treatRecivedMessage(msg);
   if (messageBack) {
-    client.sendMessage(msg.from, messageBack);
+    for (let i = 0; i < messageBack.length; i++) {
+      client.sendMessage(msg.from, messageBack[i]);
+    }
   }
 });
 
-// Inicializa o Express
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use("/", publicRoutes);
-app.use("/", auth, privateRoutes);
-app.use("/", authAdmin, adminRoutes);
-app.use("/", authSuperAdmin, superAdminRoutes);
-app.use("/", getTodayRemindersRoute);
 
-app.listen(3050, () => {
-  console.log("Servidor rodando em http://localhost:3050");
+app.use("/public", publicRoutes);
+
+app.use("/private", privateRoutes);
+
+app.use("/admin", authAdmin, adminRoutes);
+
+app.use("/superadmin", authSuperAdmin, superAdminRoutes);
+
+app.use("/reminders", auth, getTodayRemindersRoute);
+
+app.listen(3000, () => {
+  console.log("Servidor rodando em http://localhost:3000");
 });
 
 client.initialize();
-const TWO_HOURS = 1000 * 60 * 60;
-
-const isWithinWorkingHours = () => {
-  const now = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
-  const date = new Date(now);
-  const hour = date.getHours();
-  return hour >= 7 && hour < 20;
-};
 
 (async () => {
   await waitClientReady();
-
-  if (isWithinWorkingHours()) {
-    whatsAppGetReminder();
-  }
-
-  setInterval(() => {
-    if (isWithinWorkingHours()) {
-      whatsAppGetReminder();
-    }
-  }, TWO_HOURS);
+  reminders(60);
 })();
 
 export { client, sendMessage };

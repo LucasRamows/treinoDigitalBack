@@ -24,7 +24,6 @@ const updateTaskById = async (data: any) => {
       },
     });
 
-    console.log("Atualizado:", updatedTask);
 
     return {
       ...updatedTask,

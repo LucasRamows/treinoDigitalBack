@@ -1,6 +1,12 @@
 import { prisma } from "../../../prisma/prisma";
 
-const createTask = async ( name:string, description:string, userId:string, date:Date, isPriority:boolean) => {
+const createTask = async (
+  name: string,
+  description: string,
+  phone: string,
+  date: Date,
+  isPriority: boolean
+) => {
   try {
     const newTask = await prisma.tasks.create({
       data: {
@@ -8,9 +14,10 @@ const createTask = async ( name:string, description:string, userId:string, date:
         description,
         date,
         isPriority,
-        userId
+        user: {
+          connect: { phone: phone },
+        },
       },
-
     });
     return newTask;
   } catch (error) {

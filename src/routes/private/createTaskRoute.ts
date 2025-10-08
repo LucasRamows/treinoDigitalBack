@@ -1,59 +1,37 @@
 import express from "express";
-import createTask from "../../modules/post/createTask";
 import createReminder from "../../modules/post/createReminder";
-import getUser from "../../modules/gets/getUser";
+import createTask from "../../modules/post/createTask";
 
 const router = express.Router();
-
 router.use(express.json());
 
-const parseDateDMY = (dateStr: string): Date => {
+const parseDateDMY = (dateStr: string, time?: string): Date => {
   const [day, month, year] = dateStr.split("/").map(Number);
-  return new Date(year, month - 1, day); // mês no Date é 0-index
+  let hours = 0;
+  let minutes = 0;
+  if (time) {
+    [hours, minutes] = time.split(":").map(Number);
+  }
+  return new Date(year, month - 1, day, hours, minutes);
 };
 
 router.post("/create-task", async (req, res) => {
   try {
-    const { name, description, date, isPriority, phone, reminderDays } =
-      req.body;
-    const userId = await getUser(undefined, phone, false, undefined);
-    console.log(userId)
-    const taskDate = date
-      ? parseDateDMY(date)
-      : new Date(
-          new Date().getFullYear(),
-          new Date().getMonth(),
-          new Date().getDate()
-        );
+    const { name, description, date, time, isPriority, phone, reminderDays } = req.body;
 
-    // Cria a task
-    const newTask = await createTask(
-      name,
-      description,
-      userId?userId.id:"",
-      taskDate,
-      isPriority ?? false
-    );
+    const taskDate = date ? parseDateDMY(date, time) : new Date();
+    const newTask = await createTask(name, description, phone, taskDate, isPriority ?? false);
 
-    // Cria os reminders, se informado
-    if (reminderDays && !isNaN(reminderDays)) {
+    if (reminderDays) {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // zerar horas para comparar apenas a data
+      today.setHours(0, 0, 0, 0);
 
-      for (let index = 0; index <= Number(reminderDays); index++) {
-        const reminderDate = new Date(
-          taskDate.getFullYear(),
-          taskDate.getMonth(),
-          taskDate.getDate()
-        );
-        reminderDate.setDate(reminderDate.getDate() - index);
+      for (let i = 0; i <= Number(reminderDays); i++) {
+        const reminderDate = new Date(taskDate);
+        reminderDate.setDate(reminderDate.getDate() - i);
 
-        // Só cria reminder se a data for >= hoje
         if (reminderDate >= today) {
-          const reminder = await createReminder(reminderDate, newTask.id);
-          console.log("Reminder criado:", reminder);
-        } else {
-          console.log("Ignorado reminder em data passada:", reminderDate);
+          await createReminder(reminderDate, newTask.id);
         }
       }
     }

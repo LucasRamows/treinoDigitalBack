@@ -13,9 +13,7 @@ router.post("/end-session", async (req, res) => {
   }
 
   try {
-    console.log("Finalizando sessão do ID:", id);
     await endSession(id);
-    console.log("Sessão finalizada com sucesso");
     res.status(200).json({ message: "Sessão finalizada com sucesso" });
   } catch (error) {
     console.error("Erro ao deletar sessão:", error);
